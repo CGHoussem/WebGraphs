@@ -10,13 +10,16 @@
 class Graph
 {
 private:
-    std::map<uint, int> vertices; // <ID, value>
+    std::map<uint, int> vertices; // <vertexID, vertexValue>
     std::list<std::pair<uint, uint>> edges; // <vertexID, vertexID>
-    
+    std::map<uint, std::list<uint>> neighbours; // <vertexID, [vertexID1, vertexID2, ...]>
+
     uint getVerticesCount();
     uint getEdgesCount();
     uint getMaxDegree();
     double getAverageDegree();
+
+    static void assigningNeighbours(Graph& graph,  uint vertex1ID, uint vertex2ID, bool isDirected=false);
 
     uint calculateSumDegrees();
     uint calculateVertexDegree(uint vertexID);
@@ -28,7 +31,7 @@ public:
     void generateEdgarGilbert(uint nb_s);
     void generateBarabasiAlbert(uint m);
 
-    static Graph importFrom(const std::string& filename, FileFormatType type);
+    static Graph importFrom(const std::string& filename, FileFormatType type, bool isDirected=false);
     void extractTo(const std::string& filename);
 
     void dump();
@@ -56,7 +59,11 @@ void Graph::generateEdgarGilbert(uint nb_s)
         {
             if (i == j) continue;
             double prob = ((double) std::rand() / (RAND_MAX));
-            if (prob >= 0.5) edges.push_front(std::make_pair(i, j));
+            if (prob >= 0.5) 
+            {
+                edges.push_front(std::make_pair(i, j));
+                Graph::assigningNeighbours(*this, i, j);
+            }
         }
     }
 
@@ -73,6 +80,10 @@ void Graph::generateBarabasiAlbert(uint m)
     edges.push_front(std::make_pair(0, 1));
     edges.push_front(std::make_pair(1, 2));
     edges.push_front(std::make_pair(2, 0));
+    // Assigning neighbours
+    Graph::assigningNeighbours(*this, 0, 1);
+    Graph::assigningNeighbours(*this, 1, 2);
+    Graph::assigningNeighbours(*this, 2, 0);
 
     /// Running the algorithm
     uint created_edges_count = 0;
@@ -80,7 +91,7 @@ void Graph::generateBarabasiAlbert(uint m)
     uint sum_degrees = calculateSumDegrees();
     while (created_edges_count < m)
     {
-        uint degree = calculateVertexDegree(vertex_index);
+        uint degree = neighbours[vertex_index].size();
         double prob = ((double) std::rand() / (RAND_MAX));
         double adding_prob = (double)degree/sum_degrees;
         if (prob <= adding_prob)
@@ -91,6 +102,9 @@ void Graph::generateBarabasiAlbert(uint m)
             // create an edge between the created vertex and {vertex_index}
             edges.push_front(std::make_pair(vertices.size()-1, vertex_index));
             created_edges_count++;
+
+            // assigning neighbours
+            Graph::assigningNeighbours(*this, vertices.size()-1, vertex_index);
         }
         if (vertex_index++ >= vertices.size()) vertex_index = 0;
     }
@@ -124,7 +138,7 @@ void Graph::extractTo(const std::string& filename)
     std::cout << "The graph has been saved to " << filename << " successfully." << std::endl;
 }
 
-Graph Graph::importFrom(const std::string& filename, FileFormatType type)
+Graph Graph::importFrom(const std::string& filename, FileFormatType type, bool isDirected)
 {
     Graph temp;
 
@@ -167,6 +181,9 @@ Graph Graph::importFrom(const std::string& filename, FileFormatType type)
 
             // Adding the edge connection the extracted vertices
             temp.edges.push_front(std::make_pair(vertex1ID, vertex2ID));
+
+            // Assigning the neighbours
+            Graph::assigningNeighbours(temp, vertex1ID, vertex2ID, isDirected);
         }
         file.close();
     }
@@ -176,13 +193,22 @@ Graph Graph::importFrom(const std::string& filename, FileFormatType type)
 
 void Graph::dump() 
 {
-    std::cout << getVerticesCount() << std::endl;
-    std::cout << getEdgesCount() << std::endl;
-    std::cout << getMaxDegree() << std::endl;
-    std::cout << getAverageDegree() << std::endl;
+    std::cout << "# of vertices: " << getVerticesCount() << std::endl;
+    std::cout << "# of edges: " << getEdgesCount() << std::endl;
+    std::cout << "max degree: " << getMaxDegree() << std::endl;
+    std::cout << "average degree: " << getAverageDegree() << std::endl;
 }
 
 // Private Methods
+void Graph::assigningNeighbours(Graph& graph, uint vertex1ID, uint vertex2ID, bool isDirected)
+{
+    // Assigning the neighbours
+    graph.neighbours[vertex1ID].push_front(vertex2ID);
+    // If the graph is not directed add parallel neighbour
+    if (!isDirected)
+        graph.neighbours[vertex2ID].push_front(vertex1ID);
+}
+
 uint Graph::getVerticesCount()
 {
     return vertices.size();
@@ -198,7 +224,7 @@ uint Graph::getMaxDegree()
     uint max = 0;
     for (const auto& v : vertices)
     {
-        uint deg = calculateVertexDegree(v.first);
+        uint deg = neighbours[v.first].size();
         if (deg > max) max = deg;
     }
     return max;
@@ -212,15 +238,6 @@ double Graph::getAverageDegree()
 uint Graph::calculateSumDegrees()
 {
     return edges.size() * 2;
-}
-
-uint Graph::calculateVertexDegree(uint vertexID)
-{
-    uint sum = 0;
-    for (const auto& edge : edges)
-        if (edge.first == vertexID || edge.second == vertexID)
-            sum ++;
-    return sum;
 }
 
 std::list<uint> Graph::getVertexNeighbours(uint vertexID) 
