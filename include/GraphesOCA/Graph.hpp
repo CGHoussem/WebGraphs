@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <map>
 #include <list>
 
@@ -11,6 +13,7 @@ private:
 
     uint calculateSumDegrees();
     uint calculateVertexDegree(uint vertexID);
+    std::list<uint> getVertexNeighbours(uint vertexID);
 public:
     Graph();
     ~Graph();
@@ -18,7 +21,7 @@ public:
     void generateEdgarGilbert(uint nb_s);
     void generateBarabasiAlbert(uint m);
 
-    void printAll();
+    void extractTo(const std::string& filename);
 };
 
 Graph::Graph()
@@ -29,6 +32,7 @@ Graph::~Graph()
 {
 }
 
+// Public Methods
 void Graph::generateEdgarGilbert(uint nb_s) 
 {
     // generate vertices
@@ -84,6 +88,33 @@ void Graph::generateBarabasiAlbert(uint m)
     std::cout << "A graph has been generated using Barbasi-Albert's method.\n";
 }
 
+void Graph::extractTo(const std::string& filename) 
+{
+    // Save the list of neighbours of the vertices  
+    std::ofstream file;
+    file.open(filename);
+    file << "Vertex ID; Vertex Value; Vertex Neighbours" << std::endl;
+    for (const auto& v : vertices)
+    {
+        std::list<uint> neighbours = getVertexNeighbours(v.first);
+        std::string neighboursStr;
+        for (const auto& n : neighbours)
+        {
+            std::stringstream ss;
+            ss << n << ",";
+            std::string s;
+            ss >> s;
+            neighboursStr.append(s);
+        }
+        neighboursStr.pop_back();
+        file << v.first << "; " << v.second << "; " << neighboursStr << std::endl;
+    }
+    file.close();
+
+    std::cout << "The graph has been saved to " << filename << " successfully." << std::endl;
+}
+
+// Private Methods
 uint Graph::calculateSumDegrees()
 {
     return edges.size() * 2;
@@ -98,17 +129,17 @@ uint Graph::calculateVertexDegree(uint vertexID)
     return sum;
 }
 
-void Graph::printAll()
+std::list<uint> Graph::getVertexNeighbours(uint vertexID) 
 {
-    uint c_tabs = 0;
-    std::cout << "Edges\n";
-    for (const auto& v : edges)
+    std::list<uint> neighbors;
+
+    for (const auto& edge : edges) 
     {
-        std::cout << v.first << "+" << v.second << "\t";
-        if (c_tabs++ >= 4)
-        {
-            std::cout << std::endl;
-            c_tabs = 0;
-        }
+        if (edge.first == vertexID)
+            neighbors.push_front(edge.second);
+        if (edge.second == vertexID)
+            neighbors.push_front(edge.first);
     }
+
+    return neighbors;
 }
