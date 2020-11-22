@@ -4,12 +4,19 @@
 #include <sstream>
 #include <map>
 #include <list>
+#include <regex>
+#include "FileFormatType.hpp"
 
 class Graph
 {
 private:
     std::map<uint, int> vertices; // <ID, value>
     std::list<std::pair<uint, uint>> edges; // <vertexID, vertexID>
+    
+    uint getVerticesCount();
+    uint getEdgesCount();
+    uint getMaxDegree();
+    double getAverageDegree();
 
     uint calculateSumDegrees();
     uint calculateVertexDegree(uint vertexID);
@@ -21,7 +28,10 @@ public:
     void generateEdgarGilbert(uint nb_s);
     void generateBarabasiAlbert(uint m);
 
+    static Graph importFrom(const std::string& filename, FileFormatType type);
     void extractTo(const std::string& filename);
+
+    void dump();
 };
 
 Graph::Graph()
@@ -114,7 +124,91 @@ void Graph::extractTo(const std::string& filename)
     std::cout << "The graph has been saved to " << filename << " successfully." << std::endl;
 }
 
+Graph Graph::importFrom(const std::string& filename, FileFormatType type)
+{
+    Graph temp;
+
+    std::string line;
+    std::regex r;
+    std::smatch m;
+    u_char lines_to_skip;
+
+    // Defining the regex pattern
+    switch (type)
+    {
+    case FileFormatType::ROAD_NETWORK:
+        r = "(.*)\t(.*)";
+        lines_to_skip = 4;
+        break;
+    default:
+        r = "(.*),(.*)";
+        lines_to_skip = 1;
+        break;
+    }
+
+    std::ifstream file(filename);
+    if (file.is_open())
+    {
+        // Skipping the header lines
+        uint i = 0;
+        while (i++ < lines_to_skip) getline(file, line);
+
+        // Extracting vertices & edges
+        while (getline(file, line))
+        {
+            // Getting the vertices ids with a regex search
+            std::regex_search(line, m, r);
+            uint vertex1ID = std::stoi(m[1].str());
+            uint vertex2ID = std::stoi(m[2].str());
+
+            // Adding the vertices to the vertices map
+            temp.vertices.insert(std::make_pair(vertex1ID, -1));
+            temp.vertices.insert(std::make_pair(vertex2ID, -1));
+
+            // Adding the edge connection the extracted vertices
+            temp.edges.push_front(std::make_pair(vertex1ID, vertex2ID));
+        }
+        file.close();
+    }
+    
+    return temp;
+}
+
+void Graph::dump() 
+{
+    std::cout << getVerticesCount() << std::endl;
+    std::cout << getEdgesCount() << std::endl;
+    std::cout << getMaxDegree() << std::endl;
+    std::cout << getAverageDegree() << std::endl;
+}
+
 // Private Methods
+uint Graph::getVerticesCount()
+{
+    return vertices.size();
+}
+
+uint Graph::getEdgesCount()
+{
+    return edges.size();
+}
+
+uint Graph::getMaxDegree()
+{
+    uint max = 0;
+    for (const auto& v : vertices)
+    {
+        uint deg = calculateVertexDegree(v.first);
+        if (deg > max) max = deg;
+    }
+    return max;
+}
+
+double Graph::getAverageDegree()
+{
+    return (double)calculateSumDegrees() / getVerticesCount();
+}
+
 uint Graph::calculateSumDegrees()
 {
     return edges.size() * 2;
