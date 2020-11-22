@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/GraphesOCA/Graph.hpp"
+#include "../include/GraphesOCA/Graph.cpp"
 
 int main(int, char**) 
 {
