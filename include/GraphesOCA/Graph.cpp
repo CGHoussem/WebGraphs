@@ -178,13 +178,13 @@ void Graph::extractAxis(const std::string& filename)
     // Extracting data to a csv file (format: x axis, y axis)
     std::ofstream file;
     file.open(filename);
-    file << "Degree; Occurrence" << std::endl;
+    file << "Degree;Occurrence" << std::endl;
     for (const auto& f : frequencies)
     {
         uint degree = f.first;
         uint occ = f.second;
 
-        file << degree << "; " << occ << std::endl;
+        file << degree << ";" << occ << std::endl;
     }
     file.close();
 

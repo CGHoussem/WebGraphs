@@ -1,2 +1,8 @@
+# project
 .vscode
+
+# cpp
 build
+
+# python
+venv
