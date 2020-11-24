@@ -3,6 +3,7 @@
 
 int main(int, char**) 
 {
+    // PARTIE I
     // std::srand(time(NULL));
     // Graph edgarGraph, barbasiGraph;
     // uint nb_v, m;
@@ -17,29 +18,39 @@ int main(int, char**)
     // barbasiGraph.generateBarabasiAlbert(m);
     // barbasiGraph.extractTo("barbasiGraph.csv");
 
-    Graph roadNetowkrGraph = Graph::importFrom("../database/RoadNetwork.txt", FileFormatType::ROAD_NETWORK, true);
+    // PARTIE II
+    Graph roadNetwokrGraph = Graph::importFrom("../database/RoadNetwork.txt", FileFormatType::ROAD_NETWORK, true);
     std::cout << "Road Network Graph" << std::endl;
-    roadNetowkrGraph.dump();
+    // roadNetwokrGraph.dump();
+    roadNetwokrGraph.extractAxis("PlottingRoadNetwork.csv");
 
     Graph facebookGraph = Graph::importFrom("../database/FacebookSites.csv", FileFormatType::FACEBOOK);
     std::cout << "Facebook Graph" << std::endl;
-    facebookGraph.dump();
+    // facebookGraph.dump();
+    roadNetwokrGraph.extractAxis("PlottingFacebook.csv");
 
     Graph githubGraph = Graph::importFrom("../database/GitHub.csv", FileFormatType::GITHUB);
     std::cout << "GitHub Graph" << std::endl;
-    githubGraph.dump();
+    // githubGraph.dump();
+    githubGraph.extractAxis("PlottingGitHub.csv");
+    
 
     Graph twitchGraph = Graph::importFrom("../database/twitchDE.csv", FileFormatType::TWITCH);
     std::cout << "TwitchDE Graph" << std::endl;
-    twitchGraph.dump();
+    // twitchGraph.dump();
+    twitchGraph.extractAxis("PlottingTwitch.csv");
 
-    Graph Wikipedia1Graph = Graph::importFrom("../database/Wikipedia1.csv", FileFormatType::WIKIPEDIA);
+
+    Graph wikipedia1Graph = Graph::importFrom("../database/Wikipedia1.csv", FileFormatType::WIKIPEDIA);
     std::cout << "Wikipedia 1 Graph" << std::endl;
-    Wikipedia1Graph.dump();
+    // wikipedia1Graph.dump();
+    wikipedia1Graph.extractAxis("PlottingWikipedia1.csv");
 
-    Graph Wikipedia2Graph = Graph::importFrom("../database/Wikipedia2.csv", FileFormatType::WIKIPEDIA);
+
+    Graph wikipedia2Graph = Graph::importFrom("../database/Wikipedia2.csv", FileFormatType::WIKIPEDIA);
     std::cout << "Wikipedia 2 Graph" << std::endl;
-    Wikipedia2Graph.dump();
+    // wikipedia2Graph.dump();
+    wikipedia2Graph.extractAxis("PlottingWikipedia2.csv");
 
     return 0;
 }

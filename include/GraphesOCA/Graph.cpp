@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <regex>
+#include <iostream>
 
 
 Graph::Graph()
@@ -158,6 +159,39 @@ Graph Graph::importFrom(const std::string& filename, FileFormatType type, bool i
     return temp;
 }
 
+void Graph::extractAxis(const std::string& filename)
+{
+    // x axis : # of neighbours
+    // y axis : occurrence frequency
+
+    // Counting (# of neighbours) occurences
+    std::map<uint, uint> frequencies;
+    for (const auto& v : vertices)
+    {
+        uint deg = calculateVertexDegree(v.first);
+        if (frequencies.find(deg) != frequencies.end()) 
+            frequencies[deg]++;
+        else
+            frequencies[deg] = 1;
+    }
+
+    // Extracting data to a csv file (format: x axis, y axis)
+    std::ofstream file;
+    file.open(filename);
+    file << "Degree; Occurrence" << std::endl;
+    for (const auto& f : frequencies)
+    {
+        uint degree = f.first;
+        uint occ = f.second;
+
+        file << degree << "; " << occ << std::endl;
+    }
+    file.close();
+
+    std::cout << "The graph plotting axis has been extracted to " << filename << " successfully." << std::endl;
+
+}
+
 void Graph::dump() 
 {
     std::cout << "# of vertices: " << getVerticesCount() << std::endl;
@@ -191,7 +225,7 @@ uint Graph::getMaxDegree()
     uint max = 0;
     for (const auto& v : vertices)
     {
-        uint deg = neighbours[v.first].size();
+        uint deg = calculateVertexDegree(v.first);
         if (deg > max) max = deg;
     }
     return max;
@@ -200,6 +234,11 @@ uint Graph::getMaxDegree()
 double Graph::getAverageDegree()
 {
     return (double)calculateSumDegrees() / getVerticesCount();
+}
+
+uint Graph::calculateVertexDegree(uint vertexID) 
+{
+    return neighbours[vertexID].size();
 }
 
 uint Graph::calculateSumDegrees()

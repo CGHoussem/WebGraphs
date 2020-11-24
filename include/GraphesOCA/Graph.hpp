@@ -30,6 +30,7 @@ public:
 
     static Graph importFrom(const std::string& filename, FileFormatType type, bool isDirected=false);
     void extractTo(const std::string& filename);
+    void extractAxis(const std::string& filename);
 
     void dump();
 };
