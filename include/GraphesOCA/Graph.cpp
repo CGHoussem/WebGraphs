@@ -13,14 +13,20 @@ Graph::~Graph()
 {
 }
 
-// Public Methods
+//// Les méthodes publiques
+
+/**
+ * Cette fonction permet de générer un graphe avec l'algorithme de Edgar Gilbert.
+ * 
+ * @param nb_s: le nombre de sommets dans le graphe
+ **/ 
 void Graph::generateEdgarGilbert(uint nb_s) 
 {
-    // generate vertices
+    // Génération des sommets
     for (uint i = 0; i < nb_s; i++) 
         vertices.insert(std::make_pair(i, std::rand()));
 
-    // generate edges
+    // Génération des arêtes
     for (uint i = 0; i < nb_s; i++)
     {
         for (uint j = 0; j < nb_s; j++)
@@ -38,22 +44,27 @@ void Graph::generateEdgarGilbert(uint nb_s)
     std::cout << "A graph has been generated using Edgat Gilbert's method.\n";
 }
 
+/**
+ * Cette fonction permet de générer un graphe avec l'algorithme de Barabasi Albert.
+ * 
+ * @param m: le paramètre m
+ **/ 
 void Graph::generateBarabasiAlbert(uint m) 
 {
-    /// Create the initial triangle graph
-    // Create the 3 vertices
+    /// Création du graphe triangulaire initiale
+    // Créer les 3 sommets
     for (uint i = 0; i < 3; i++) 
         vertices.insert(std::make_pair(i, std::rand()));
-    // Create the edges between them
+    // Créer les arêtes entre eux
     edges.push_front(std::make_tuple(0, 1, rand() % m));
     edges.push_front(std::make_tuple(1, 2, rand() % m));
     edges.push_front(std::make_tuple(2, 0, rand() % m));
-    // Assigning neighbours
+    // Assigner les voisins
     Graph::assigningNeighbours(*this, 0, 1);
     Graph::assigningNeighbours(*this, 1, 2);
     Graph::assigningNeighbours(*this, 2, 0);
 
-    /// Running the algorithm
+    /// Génération de l'algorithme
     uint created_edges_count = 0;
     uint vertex_index = 0;
     uint sum_degrees = calculateSumDegrees();
@@ -64,14 +75,14 @@ void Graph::generateBarabasiAlbert(uint m)
         double adding_prob = (double)degree/sum_degrees;
         if (prob <= adding_prob)
         {
-            // create a vertex
+            // Créer un sommet
             vertices.insert(std::make_pair(vertices.size(), std::rand()));
             
-            // create an edge between the created vertex and {vertex_index}
+            // Créer une arête entre le sommet crée et {vertex_index}
             edges.push_front(std::make_tuple(vertices.size()-1, vertex_index, rand() % m));
             created_edges_count++;
 
-            // assigning neighbours
+            // Assigner les voisins
             Graph::assigningNeighbours(*this, vertices.size()-1, vertex_index);
         }
         if (vertex_index++ >= vertices.size()) vertex_index = 0;
@@ -80,9 +91,14 @@ void Graph::generateBarabasiAlbert(uint m)
     std::cout << "A graph has been generated using Barbasi-Albert's method.\n";
 }
 
+/**
+ * Cette fonction permet de sauvegarder le graphe à un fichier.
+ * 
+ * @param filename: le nom du fichier destinataire
+ **/ 
 void Graph::extractTo(const std::string& filename) 
 {
-    // Save the list of neighbours of the vertices  
+    // Enregistrer la liste des voisins de toutes les sommets
     std::ofstream file;
     file.open(filename);
     file << "Vertex ID; Vertex Value; Vertex Neighbours" << std::endl;
@@ -106,12 +122,17 @@ void Graph::extractTo(const std::string& filename)
     std::cout << "The graph has been saved to " << filename << " successfully." << std::endl;
 }
 
+/**
+ * Cette fonction permet d'exécuter l'algorithme Floyd Warshal sur le graphe.
+ * 
+ * @return une table de hachage ayant comme clés les paires de sommets et comme valeurs la distance entre eux
+ **/ 
 std::map<std::pair<uint, uint>, int> Graph::floydWarshal()
 {
-    std::map<std::pair<uint, uint>, int> d;
     // d is a map of weights
     // pair(1, 2) = w
     // pair(2, 1) = w
+    std::map<std::pair<uint, uint>, int> d;
 
     // initialize d
     for (const auto& e : edges) {
@@ -125,10 +146,6 @@ std::map<std::pair<uint, uint>, int> Graph::floydWarshal()
         for (const auto e : edges) {
             auto couple = std::make_pair(std::get<0>(e), std::get<1>(e));
 
-            
-            // if (!getEdgeWeight(std::get<0>(e), vk.first).second) continue;
-            // if (!getEdgeWeight(vk.first, std::get<1>(e)).second) continue;                            
-            
             if (d.find(std::make_pair(std::get<0>(e), vk.first)) == d.end()) continue;
             if (d.find(std::make_pair(vk.first, std::get<1>(e))) == d.end()) continue;
             d[couple] = std::min(
@@ -142,6 +159,15 @@ std::map<std::pair<uint, uint>, int> Graph::floydWarshal()
     return d;
 }
 
+/**
+ * Cette fonction permet de charger un graphe depuis un fichier.
+ * 
+ * @param filename: Le nom du fichier
+ * @param type: Le type du graphe chargé (Facebook/TwitchDE/GitHub/..)
+ * @param isDirected: Si le graphe chargé est orienté ou pas
+ * 
+ * @return Un graphe
+ **/ 
 Graph Graph::importFrom(const std::string& filename, FileFormatType type, bool isDirected)
 {
     Graph temp;
@@ -151,7 +177,7 @@ Graph Graph::importFrom(const std::string& filename, FileFormatType type, bool i
     std::smatch m;
     u_char lines_to_skip;
 
-    // Defining the regex pattern
+    // Définir le pattern regex
     switch (type)
     {
     case FileFormatType::ROAD_NETWORK:
@@ -195,6 +221,11 @@ Graph Graph::importFrom(const std::string& filename, FileFormatType type, bool i
     return temp;
 }
 
+/**
+ * Cette fonction permet d'enregister en un fichier les degrees et leurs occurences du graphe.
+ * 
+ * @param filename: Le nom du fichier destinataire
+ **/ 
 void Graph::extractAxis(const std::string& filename)
 {
     // x axis : # of neighbours
@@ -228,6 +259,9 @@ void Graph::extractAxis(const std::string& filename)
 
 }
 
+/**
+ * Cette fonction permet d'afficher les informations du graphe.
+ **/ 
 void Graph::dump() 
 {
     std::cout << "# of vertices: " << getVerticesCount() << std::endl;
@@ -237,7 +271,16 @@ void Graph::dump()
     std::cout << "diametre: " << getDiametre() << std::endl;
 }
 
-// Private Methods
+/// Méthodes privés
+
+/**
+ * Cette fonction permet d'assigner les voisins d'un graphe.
+ * 
+ * @param graph: L'adresse du graphe.
+ * @param vertex1ID: L'identifiant du premier sommet
+ * @param vertex2ID: L'identifiant du deuxiéme sommet
+ * @param isDirected: Si le graphe est orienté ou pas
+ **/ 
 void Graph::assigningNeighbours(Graph& graph, uint vertex1ID, uint vertex2ID, bool isDirected)
 {
     // Assigning the neighbours
@@ -247,16 +290,31 @@ void Graph::assigningNeighbours(Graph& graph, uint vertex1ID, uint vertex2ID, bo
         graph.neighbours[vertex2ID].push_front(vertex1ID);
 }
 
+/**
+ * Cette fonction permet de retourner le nombre de sommets
+ * 
+ * @return Le nombre de sommets
+ **/ 
 uint Graph::getVerticesCount()
 {
     return vertices.size();
 }
 
+/**
+ * Cette fonction permet de retourner le nombre d'arêtes
+ * 
+ * @return Le nombre de sommets
+ **/ 
 uint Graph::getEdgesCount()
 {
     return edges.size();
 }
 
+/**
+ * Cette fonction permet de calculer et retourner le maximum des degrés
+ * 
+ * @return Le maximum des degrés
+ **/ 
 uint Graph::getMaxDegree()
 {
     uint max = 0;
@@ -268,11 +326,21 @@ uint Graph::getMaxDegree()
     return max;
 }
 
+/**
+ * Cette fonction permet de calculer et retourner la moyenne des degrés
+ * 
+ * @return La moyenne des degrés
+ **/ 
 double Graph::getAverageDegree()
 {
     return (double)calculateSumDegrees() / getVerticesCount();
 }
 
+/**
+ * Cette fonction permet de calculer et retourner le diamètre du graphe.
+ * 
+ * @return Le diamètre du graphe
+ **/ 
 int Graph::getDiametre()
 {
     int diametre = 0;
@@ -285,16 +353,35 @@ int Graph::getDiametre()
     return diametre;
 }
 
+/**
+ * Cette fonction permet de retourner le degré d'un sommet donnée.
+ * 
+ * @param vertexID: L'identifiant du sommet
+ * 
+ * @return Le degré du sommet donnée
+ **/ 
 uint Graph::getVertexDegree(uint vertexID) 
 {
     return neighbours[vertexID].size();
 }
 
+/**
+ * Cette fonction permet de calculer et retourner la somme de dégrés
+ * 
+ * @return La somme de degrés
+ **/ 
 uint Graph::calculateSumDegrees()
 {
     return edges.size() * 2;
 }
 
+/**
+ * Cette fonction permet de retourner les sommets voisins d'un sommet donné
+ * 
+ * @param vertexID: L'identifiant du sommet
+ * 
+ * @return Liste des identifiants de sommets voisins
+ **/ 
 std::list<uint> Graph::getVertexNeighbours(uint vertexID) 
 {
     std::list<uint> neighbors;
@@ -310,6 +397,14 @@ std::list<uint> Graph::getVertexNeighbours(uint vertexID)
     return neighbors;
 }
 
+/**
+ * Cette fonction permet de retourner le poids de l'arềte entre deux sommets donnés.
+ * 
+ * @param vertexID1: L'identifiant du 1er sommet
+ * @param vertexID2: L'identifiant du 2eme sommet
+ * 
+ * @return Un pair contenant le poids de l'arête entre ces deux sommets et si l'arête existe ou pas.
+ **/ 
 std::pair<int, bool> Graph::getEdgeWeight(uint vertexID1, uint vertexID2)
 {
     for (const auto& edge : edges)
