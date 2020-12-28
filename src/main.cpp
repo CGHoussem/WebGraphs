@@ -4,19 +4,29 @@
 int main(int, char**) 
 {
     // PARTIE I
-    // std::srand(time(NULL));
-    // Graph edgarGraph, barbasiGraph;
-    // uint nb_v, m;
+    std::srand(time(NULL));
+    Graph edgarGraph, barbasiGraph;
+    uint nb_v, m;
 
-    // std::cout << "Enter the # of vertices: ";
-    // std::cin >> nb_v;
-    // edgarGraph.generateEdgarGilbert(nb_v);
-    // edgarGraph.extractTo("edgarGraph.csv");
+    edgarGraph.generateEdgarGilbert(25);
+    edgarGraph.dump();
+    edgarGraph.extractTo("edgarGraph25.csv");
+    edgarGraph.generateEdgarGilbert(50);
+    edgarGraph.dump();
+    edgarGraph.extractTo("edgarGraph50.csv");
+    edgarGraph.generateEdgarGilbert(100);
+    edgarGraph.dump();
+    edgarGraph.extractTo("edgarGraph100.csv");
 
-    // std::cout << "Enter the parameter 'm' for the second graph generation: ";
-    // std::cin >> m;
-    // barbasiGraph.generateBarabasiAlbert(m);
-    // barbasiGraph.extractTo("barbasiGraph.csv");
+    barbasiGraph.generateBarabasiAlbert(25);
+    barbasiGraph.dump();
+    barbasiGraph.extractTo("barbasiGraph25.csv");
+    barbasiGraph.generateBarabasiAlbert(50);
+    barbasiGraph.dump();
+    barbasiGraph.extractTo("barbasiGraph50.csv");
+    barbasiGraph.generateBarabasiAlbert(100);
+    barbasiGraph.dump();
+    barbasiGraph.extractTo("barbasiGraph100.csv");
 
     // PARTIE II
     Graph roadNetwokrGraph = Graph::importFrom("../database/RoadNetwork.txt", FileFormatType::ROAD_NETWORK, true);

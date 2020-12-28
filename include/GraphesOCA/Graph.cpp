@@ -3,6 +3,7 @@
 #include <sstream>
 #include <regex>
 #include <iostream>
+#include <algorithm>
 
 Graph::Graph()
 {
@@ -28,7 +29,7 @@ void Graph::generateEdgarGilbert(uint nb_s)
             double prob = ((double) std::rand() / (RAND_MAX));
             if (prob >= 0.5) 
             {
-                edges.push_front(std::make_tuple(i, j, rand()));
+                edges.push_front(std::make_tuple(i, j, rand() % nb_s));
                 Graph::assigningNeighbours(*this, i, j);
             }
         }
@@ -44,9 +45,9 @@ void Graph::generateBarabasiAlbert(uint m)
     for (uint i = 0; i < 3; i++) 
         vertices.insert(std::make_pair(i, std::rand()));
     // Create the edges between them
-    edges.push_front(std::make_tuple(0, 1, rand()));
-    edges.push_front(std::make_tuple(1, 2, rand()));
-    edges.push_front(std::make_tuple(2, 0, rand()));
+    edges.push_front(std::make_tuple(0, 1, rand() % m));
+    edges.push_front(std::make_tuple(1, 2, rand() % m));
+    edges.push_front(std::make_tuple(2, 0, rand() % m));
     // Assigning neighbours
     Graph::assigningNeighbours(*this, 0, 1);
     Graph::assigningNeighbours(*this, 1, 2);
@@ -67,7 +68,7 @@ void Graph::generateBarabasiAlbert(uint m)
             vertices.insert(std::make_pair(vertices.size(), std::rand()));
             
             // create an edge between the created vertex and {vertex_index}
-            edges.push_front(std::make_tuple(vertices.size()-1, vertex_index, rand()));
+            edges.push_front(std::make_tuple(vertices.size()-1, vertex_index, rand() % m));
             created_edges_count++;
 
             // assigning neighbours
@@ -113,35 +114,31 @@ std::map<std::pair<uint, uint>, int> Graph::floydWarshal()
     // pair(2, 1) = w
 
     // initialize d
-    for (const auto& v1 : vertices)
-    {
-        for (const auto& v2 : vertices)
-        {
-            auto ret = getEdgeWeight(v1.first, v2.first);
-            if (ret.first)
-                d[std::make_pair(v1.first, v2.first)] = ret.second;
-        }
+    for (const auto& e : edges) {
+        auto couple = std::make_pair(std::get<0>(e), std::get<1>(e));
+        d[couple] = std::get<2>(e);
     }
-
-    printf("initialisation complete\n");
 
     // floyd warshall algorithm
     for (const auto& vk : vertices)
     {
-        for (const auto& v1 : vertices)
-        {
-            for (const auto& v2 : vertices)
-            {
-                auto couple = std::make_pair(v1.first, v2.first);
+        for (const auto e : edges) {
+            auto couple = std::make_pair(std::get<0>(e), std::get<1>(e));
 
-                d[couple] = std::min(
-                    d[couple],
-                    d[std::make_pair(v1.first, vk.first)] +
-                    d[std::make_pair(vk.first, v2.first)]
-                );
-            }
+            
+            // if (!getEdgeWeight(std::get<0>(e), vk.first).second) continue;
+            // if (!getEdgeWeight(vk.first, std::get<1>(e)).second) continue;                            
+            
+            if (d.find(std::make_pair(std::get<0>(e), vk.first)) == d.end()) continue;
+            if (d.find(std::make_pair(vk.first, std::get<1>(e))) == d.end()) continue;
+            d[couple] = std::min(
+                d[couple],
+                d[std::make_pair(std::get<0>(e), vk.first)] +
+                d[std::make_pair(vk.first, std::get<1>(e))]
+            );
         }
     }
+
     return d;
 }
 
@@ -187,7 +184,7 @@ Graph Graph::importFrom(const std::string& filename, FileFormatType type, bool i
             temp.vertices.insert(std::make_pair(vertex2ID, -1));
 
             // Adding the edge connection the extracted vertices
-            temp.edges.push_front(std::make_tuple(vertex1ID, vertex2ID, rand()));
+            temp.edges.push_front(std::make_tuple(vertex1ID, vertex2ID, rand() % 100));
 
             // Assigning the neighbours
             Graph::assigningNeighbours(temp, vertex1ID, vertex2ID, isDirected);
@@ -237,7 +234,7 @@ void Graph::dump()
     std::cout << "# of edges: " << getEdgesCount() << std::endl;
     std::cout << "max degree: " << getMaxDegree() << std::endl;
     std::cout << "average degree: " << getAverageDegree() << std::endl;
-    // std::cout << "diametre: " << getDiametre() << std::endl;
+    std::cout << "diametre: " << getDiametre() << std::endl;
 }
 
 // Private Methods
