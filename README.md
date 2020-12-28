@@ -1,10 +1,19 @@
 # Etude de graphes du Web
 School project developed using CPP.
 
-## Installing dependencies
-...
+## Installing dependencies for python plotting!
+```bash
+    # Navigate to the Plotting directory
+    $ cd GraphesOCA/Plotting
 
-## Building
+    # Create the virtual environement (venv)
+    $ python3 -m venv venv
+
+    # Install required python modules
+    (venv)$ pip install -r requirements.txt
+``` 
+
+## Building CPP project
 Use CMake to build the project.
 ```bash
     $ cd GraphesOCA

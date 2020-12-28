@@ -4,7 +4,6 @@
 #include <regex>
 #include <iostream>
 
-
 Graph::Graph()
 {
 }
@@ -29,7 +28,7 @@ void Graph::generateEdgarGilbert(uint nb_s)
             double prob = ((double) std::rand() / (RAND_MAX));
             if (prob >= 0.5) 
             {
-                edges.push_front(std::make_pair(i, j));
+                edges.push_front(std::make_tuple(i, j, rand()));
                 Graph::assigningNeighbours(*this, i, j);
             }
         }
@@ -45,9 +44,9 @@ void Graph::generateBarabasiAlbert(uint m)
     for (uint i = 0; i < 3; i++) 
         vertices.insert(std::make_pair(i, std::rand()));
     // Create the edges between them
-    edges.push_front(std::make_pair(0, 1));
-    edges.push_front(std::make_pair(1, 2));
-    edges.push_front(std::make_pair(2, 0));
+    edges.push_front(std::make_tuple(0, 1, rand()));
+    edges.push_front(std::make_tuple(1, 2, rand()));
+    edges.push_front(std::make_tuple(2, 0, rand()));
     // Assigning neighbours
     Graph::assigningNeighbours(*this, 0, 1);
     Graph::assigningNeighbours(*this, 1, 2);
@@ -68,7 +67,7 @@ void Graph::generateBarabasiAlbert(uint m)
             vertices.insert(std::make_pair(vertices.size(), std::rand()));
             
             // create an edge between the created vertex and {vertex_index}
-            edges.push_front(std::make_pair(vertices.size()-1, vertex_index));
+            edges.push_front(std::make_tuple(vertices.size()-1, vertex_index, rand()));
             created_edges_count++;
 
             // assigning neighbours
@@ -104,6 +103,46 @@ void Graph::extractTo(const std::string& filename)
     file.close();
 
     std::cout << "The graph has been saved to " << filename << " successfully." << std::endl;
+}
+
+std::map<std::pair<uint, uint>, int> Graph::floydWarshal()
+{
+    std::map<std::pair<uint, uint>, int> d;
+    // d is a map of weights
+    // pair(1, 2) = w
+    // pair(2, 1) = w
+
+    // initialize d
+    for (const auto& v1 : vertices)
+    {
+        for (const auto& v2 : vertices)
+        {
+            auto ret = getEdgeWeight(v1.first, v2.first);
+            if (ret.first)
+                d[std::make_pair(v1.first, v2.first)] = ret.second;
+        }
+    }
+
+    printf("initialisation complete\n");
+
+    // floyd warshall algorithm
+    for (const auto& vk : vertices)
+    {
+        for (const auto& v1 : vertices)
+        {
+            for (const auto& v2 : vertices)
+            {
+                auto couple = std::make_pair(v1.first, v2.first);
+
+                d[couple] = std::min(
+                    d[couple],
+                    d[std::make_pair(v1.first, vk.first)] +
+                    d[std::make_pair(vk.first, v2.first)]
+                );
+            }
+        }
+    }
+    return d;
 }
 
 Graph Graph::importFrom(const std::string& filename, FileFormatType type, bool isDirected)
@@ -148,7 +187,7 @@ Graph Graph::importFrom(const std::string& filename, FileFormatType type, bool i
             temp.vertices.insert(std::make_pair(vertex2ID, -1));
 
             // Adding the edge connection the extracted vertices
-            temp.edges.push_front(std::make_pair(vertex1ID, vertex2ID));
+            temp.edges.push_front(std::make_tuple(vertex1ID, vertex2ID, rand()));
 
             // Assigning the neighbours
             Graph::assigningNeighbours(temp, vertex1ID, vertex2ID, isDirected);
@@ -168,7 +207,7 @@ void Graph::extractAxis(const std::string& filename)
     std::map<uint, uint> frequencies;
     for (const auto& v : vertices)
     {
-        uint deg = calculateVertexDegree(v.first);
+        uint deg = getVertexDegree(v.first);
         if (frequencies.find(deg) != frequencies.end()) 
             frequencies[deg]++;
         else
@@ -198,6 +237,7 @@ void Graph::dump()
     std::cout << "# of edges: " << getEdgesCount() << std::endl;
     std::cout << "max degree: " << getMaxDegree() << std::endl;
     std::cout << "average degree: " << getAverageDegree() << std::endl;
+    // std::cout << "diametre: " << getDiametre() << std::endl;
 }
 
 // Private Methods
@@ -225,7 +265,7 @@ uint Graph::getMaxDegree()
     uint max = 0;
     for (const auto& v : vertices)
     {
-        uint deg = calculateVertexDegree(v.first);
+        uint deg = getVertexDegree(v.first);
         if (deg > max) max = deg;
     }
     return max;
@@ -236,7 +276,19 @@ double Graph::getAverageDegree()
     return (double)calculateSumDegrees() / getVerticesCount();
 }
 
-uint Graph::calculateVertexDegree(uint vertexID) 
+int Graph::getDiametre()
+{
+    int diametre = 0;
+    std::map<std::pair<uint, uint>, int> d = floydWarshal();
+    for (std::pair<std::pair<uint, uint>, int> element : d) {
+        uint distance = element.second;
+        if (diametre < distance)
+            diametre = distance;
+    }
+    return diametre;
+}
+
+uint Graph::getVertexDegree(uint vertexID) 
 {
     return neighbours[vertexID].size();
 }
@@ -252,11 +304,23 @@ std::list<uint> Graph::getVertexNeighbours(uint vertexID)
 
     for (const auto& edge : edges) 
     {
-        if (edge.first == vertexID)
-            neighbors.push_front(edge.second);
-        if (edge.second == vertexID)
-            neighbors.push_front(edge.first);
+        if (std::get<0>(edge) == vertexID)
+            neighbors.push_front(std::get<1>(edge));
+        if (std::get<1>(edge) == vertexID)
+            neighbors.push_front(std::get<0>(edge));
     }
 
     return neighbors;
+}
+
+std::pair<int, bool> Graph::getEdgeWeight(uint vertexID1, uint vertexID2)
+{
+    for (const auto& edge : edges)
+    {
+        if (std::get<0>(edge) == vertexID1 &&
+            std::get<1>(edge) == vertexID2)
+            return std::make_pair(std::get<2>(edge), true);
+    }
+
+    return std::make_pair(-1, false);
 }
