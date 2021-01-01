@@ -51,7 +51,7 @@ int main(int, char**)
     Graph roadNetwokrGraph = Graph::importFrom("../database/RoadNetwork.txt", FileFormatType::ROAD_NETWORK, true);
     std::cout << "Road Network Graph" << std::endl;
     // Affichage des informations du graphe
-    roadNetwokrGraph.dump();
+    roadNetwokrGraph.dump(false);
     // Extraction du graph vers un fichier .csv afin de créer du graphique
     roadNetwokrGraph.extractAxis("PlottingRoadNetwork.csv");
     
@@ -59,7 +59,7 @@ int main(int, char**)
     Graph facebookGraph = Graph::importFrom("../database/FacebookSites.csv", FileFormatType::FACEBOOK);
     std::cout << "Facebook Graph" << std::endl;
     // Affichage des informations du graphe
-    facebookGraph.dump();
+    facebookGraph.dump(false);
     // Extraction du graph vers un fichier .csv afin de créer du graphique
     roadNetwokrGraph.extractAxis("PlottingFacebook.csv");
     
@@ -67,7 +67,7 @@ int main(int, char**)
     Graph githubGraph = Graph::importFrom("../database/GitHub.csv", FileFormatType::GITHUB);
     std::cout << "GitHub Graph" << std::endl;
     // Affichage des informations du graphe
-    githubGraph.dump();
+    githubGraph.dump(false);
     // Extraction du graph vers un fichier .csv afin de créer du graphique
     githubGraph.extractAxis("PlottingGitHub.csv");
 
@@ -75,7 +75,7 @@ int main(int, char**)
     Graph twitchGraph = Graph::importFrom("../database/twitchDE.csv", FileFormatType::TWITCH);
     std::cout << "TwitchDE Graph" << std::endl;
     // Affichage des informations du graphe
-    twitchGraph.dump();
+    twitchGraph.dump(false);
     // Extraction du graph vers un fichier .csv afin de créer du graphique
     twitchGraph.extractAxis("PlottingTwitch.csv");
 
@@ -83,7 +83,7 @@ int main(int, char**)
     Graph wikipedia1Graph = Graph::importFrom("../database/Wikipedia1.csv", FileFormatType::WIKIPEDIA);
     std::cout << "Wikipedia 1 Graph" << std::endl;
     // Affichage des informations du graphe
-    wikipedia1Graph.dump();
+    wikipedia1Graph.dump(false);
     // Extraction du graph vers un fichier .csv afin de créer du graphique
     wikipedia1Graph.extractAxis("PlottingWikipedia1.csv");
 
@@ -91,7 +91,7 @@ int main(int, char**)
     Graph wikipedia2Graph = Graph::importFrom("../database/Wikipedia2.csv", FileFormatType::WIKIPEDIA);
     std::cout << "Wikipedia 2 Graph" << std::endl;
     // Affichage des informations du graphe
-    wikipedia2Graph.dump();
+    wikipedia2Graph.dump(false);
     // Extraction du graph vers un fichier .csv afin de créer du graphique
     wikipedia2Graph.extractAxis("PlottingWikipedia2.csv");
 

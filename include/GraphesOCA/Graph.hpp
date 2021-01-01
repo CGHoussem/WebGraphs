@@ -38,5 +38,5 @@ public:
     void extractTo(const std::string& filename);
     void extractAxis(const std::string& filename);
 
-    void dump();
+    void dump(bool calculate_diametre=true);
 };

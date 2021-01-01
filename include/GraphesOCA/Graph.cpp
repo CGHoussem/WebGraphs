@@ -262,13 +262,14 @@ void Graph::extractAxis(const std::string& filename)
 /**
  * Cette fonction permet d'afficher les informations du graphe.
  **/ 
-void Graph::dump() 
+void Graph::dump(bool calculate_diametre) 
 {
     std::cout << "# of vertices: " << getVerticesCount() << std::endl;
     std::cout << "# of edges: " << getEdgesCount() << std::endl;
     std::cout << "max degree: " << getMaxDegree() << std::endl;
     std::cout << "average degree: " << getAverageDegree() << std::endl;
-    std::cout << "diametre: " << getDiametre() << std::endl;
+    if (calculate_diametre)
+        std::cout << "diametre: " << getDiametre() << std::endl;
 }
 
 /// Méthodes privés
