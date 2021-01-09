@@ -1,4 +1,4 @@
-# Etude de graphes du Web
+# Study of Web graphs
 School project developed using CPP.
 
 ## Installing dependencies for python plotting!
