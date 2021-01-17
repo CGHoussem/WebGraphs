@@ -34,7 +34,7 @@ Executing the CPP binary to extract data from the graphs database.
 ### Part 2
 Executing the Python script to make the plots (charts).
 
-***Keep in mind that this part requires the installed dependencies mentionned above!***
+***Keep in mind that this part requires the installed dependencies mentioned above!***
 ```bash
     $ cd GraphesOCA/Plotting
 
