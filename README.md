@@ -1,5 +1,5 @@
-# Etude de graphes du Web
-School project developed using CPP.
+# Study of Web graphs
+School project developed using CPP and Python.
 
 ## Installing dependencies for python plotting!
 ```bash
